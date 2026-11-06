@@ -1,0 +1,42 @@
+Test Case ID,Module,Scenario,Test Data,Expected Result,Requirement,Technique,Suite,Priority
+TC_SMK_01,Smoke,Health check,GET /health,200; status ok; correct release,REQ-13,-,Smoke + Regression,High
+TC_SMK_02,Smoke,Core flow: open / deposit / withdraw,deposit 500.00; withdraw 120.50,Balance 379.50,REQ-01 REQ-04 REQ-05,-,Smoke + Regression,High
+TC_ACC_01,Accounts,Open checking account,owner Aisyah; type checking,201; balance 0.00; active; 10-digit number,REQ-01,Equivalence partitioning (valid),Regression,High
+TC_ACC_02,Accounts,Open savings account,owner Aisyah; type savings,201; balance 0.00; active,REQ-01,Equivalence partitioning (valid),Regression,High
+TC_ACC_03a-d,Accounts,Invalid account type,"current, empty, missing, SAVINGS",400,REQ-02,Equivalence partitioning (invalid),Regression,Medium
+TC_ACC_04a-c,Accounts,Owner required,"empty, spaces, missing",400,REQ-02,Equivalence partitioning (invalid),Regression,Medium
+TC_ACC_05,Accounts,Unknown account,9999999999,404,REQ-03,-,Regression,Medium
+TC_ACC_06,Accounts,Account numbers unique,5 new accounts,5 different numbers,REQ-01,-,Regression,Medium
+TC_DEP_01,Deposit,Deposit increases balance,100.00,Balance 100.00; deposit in history,REQ-04 REQ-11,-,Regression,High
+TC_DEP_02a-b,Deposit,Valid boundaries,"0.01, 50000.00",Accepted,REQ-04,Boundary value analysis,Regression,High
+TC_DEP_03a-d,Deposit,Invalid boundaries,"0, 0.00, -10.00, 50000.01",400; balance unchanged,REQ-04,Boundary value analysis,Regression,High
+TC_DEP_04,Deposit,More than 2 decimals,10.005,400,REQ-04,Equivalence partitioning (invalid),Regression,Medium
+TC_DEP_05a-d,Deposit,Non-numeric amount,"abc, missing, true, NaN",400,REQ-04,Equivalence partitioning (invalid),Regression,Medium
+TC_DEP_06,Deposit,Exact arithmetic,0.1 then 0.2,Balance exactly 0.30,REQ-12,-,Regression,High
+TC_DEP_07,Deposit,Deposit to frozen account,frozen account; 10.00,409; balance unchanged,REQ-08,State transition,Regression,High
+TC_WD_01,Withdraw,Withdraw within balance,200.00 balance; 75.25,Balance 124.75,REQ-05,-,Regression,High
+TC_WD_02,Withdraw,Withdraw exact balance,80.00 balance; 80.00,Allowed; balance 0.00,REQ-05,Boundary value analysis,Regression,High
+TC_WD_03,Withdraw,One sen over balance,80.00 balance; 80.01,400 Insufficient funds; unchanged,REQ-05,Boundary value analysis,Regression,High
+TC_WD_04a-b,Withdraw,Per-transaction limit,"5000.00, 5000.01",200 then 400,REQ-05,Boundary value analysis,Regression,High
+TC_WD_05,Withdraw,Withdraw from frozen account,frozen; 10.00,409; unchanged,REQ-08,State transition,Regression,High
+TC_TRF_01,Transfer,Own-account transfer,"Aisyah checking to Aisyah savings; 200.00",201; fee 0.00; balances move,REQ-06 REQ-07,Decision table,Smoke + Regression,High
+TC_TRF_02,Transfer,Fee between different customers,Aisyah to Ravi; 100.00,Fee 1.00; sender 399.00; receiver 100.00,REQ-07,Decision table,New feature (v1.1),High
+TC_TRF_03,Transfer,Fee is separate transaction,Aisyah to Ravi; 100.00,History: fee -1.00 then transfer_out -100.00,REQ-07 REQ-11,-,New feature (v1.1),Medium
+TC_TRF_04,Transfer,Same account,A to A,400,REQ-06,Decision table,Regression,Medium
+TC_TRF_05,Transfer,Unknown destination,to 9999999999,404; source unchanged,REQ-06,Decision table,Regression,Medium
+TC_TRF_06a-b,Transfer,Frozen source / destination,one side frozen,409; both unchanged,REQ-08,Decision table,Regression,High
+TC_TRF_07,Transfer,Insufficient funds,50.00 balance; 50.01,400; both unchanged,REQ-06,Decision table + BVA,Regression,High
+TC_TRF_08,Transfer,Funds must cover amount + fee,100.00 balance; send 100.00 to Ravi,400; no negative balance,REQ-06 REQ-07,Boundary value analysis,New feature (v1.1),High
+TC_TRF_09,Transfer,Receiver history shows transfer,120.00 transfer,Receiver has transfer_in 120.00,REQ-11,-,Regression,High
+TC_TRF_10,Transfer,Money conserved,"two own-account transfers",Total before = total after,REQ-06 REQ-12,-,Regression,High
+TC_INT_01,Interest,Monthly interest,savings 1200.00,Interest 2.50; balance 1202.50,REQ-10,-,Regression,High
+TC_INT_02,Interest,Half-up rounding,savings 12.00 (interest 0.025),Interest 0.03,REQ-10,Boundary value analysis,Regression,High
+TC_INT_03,Interest,No interest on checking,checking 1200.00,400; unchanged,REQ-10,Equivalence partitioning (invalid),Regression,Medium
+TC_INT_04,Interest,Zero balance,savings 0.00,Interest 0.00; no transaction,REQ-10,Boundary value analysis,Regression,Low
+TC_ST_01,Account state,Freeze then unfreeze,active account,frozen then active; works again,REQ-09,State transition,Regression,High
+TC_ST_02,Account state,Freeze a frozen account,frozen account,409,REQ-09,State transition (invalid),Regression,Medium
+TC_ST_03,Account state,Unfreeze an active account,active account,409,REQ-09,State transition (invalid),Regression,Medium
+TC_ST_04,Account state,Frozen account viewable,frozen account,200; balance and history visible,REQ-08,State transition,Regression,Medium
+TC_TXN_01,History,Newest first,"deposit, withdraw, deposit",Reverse order,REQ-11,-,Regression,Medium
+TC_TXN_02,History,Running balance,4 operations,Each balance_after = previous + amount,REQ-11 REQ-12,-,Regression,High
+TC_TXN_03,History,Failed operations not recorded,2 rejected operations,Only the setup deposit in history,REQ-11,-,Regression,Medium

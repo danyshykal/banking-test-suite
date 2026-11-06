@@ -1,0 +1,32 @@
+name: Banking Regression Suite
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - run: pip install -r requirements.txt
+
+      - name: Smoke tests (latest release)
+        run: pytest -m smoke --html=reports/smoke.html --self-contained-html
+
+      - name: Full suite on v1.2 (latest) - must pass
+        run: pytest --release 1.2 --html=reports/v1.2.html --self-contained-html
+
+      - name: Full suite on v1.0 (previous stable) - must pass
+        run: pytest --release 1.0 --html=reports/v1.0.html --self-contained-html
+
+      - name: Regression gate demo on v1.1 - must FAIL (release blocked)
+        run: "! pytest --release 1.1 -q --html=reports/v1.1-blocked.html --self-contained-html"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: regression-reports
+          path: reports/
